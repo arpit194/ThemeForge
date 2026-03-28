@@ -1,0 +1,26 @@
+{
+  "name": "@arpit194/themeforge-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for ThemeForge — gives Claude knowledge of your token catalog",
+  "type": "module",
+  "bin": {
+    "themeforge-mcp": "./dist/mcp/src/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.28.0"
+  },
+  "peerDependencies": {
+    "themeforge": ">=0.1.0"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3"
+  }
+}
