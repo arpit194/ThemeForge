@@ -21,7 +21,7 @@
     "@modelcontextprotocol/sdk": "^1.28.0"
   },
   "peerDependencies": {
-    "themeforge": ">=0.1.0"
+    "@arpit194/themeforge": ">=0.1.0"
   },
   "devDependencies": {
     "typescript": "~5.9.3"
