@@ -16,6 +16,7 @@ import {
   DEFAULT_LINE_HEIGHTS,
   DEFAULT_PREFIX,
   DEFAULT_RADIUS,
+  DEFAULT_SEMANTIC,
   DEFAULT_SHADOWS,
   DEFAULT_SPACING,
   DEFAULT_TEXT_STYLES,
@@ -24,6 +25,7 @@ import type {
   ColorScale,
   GenerateShadesFn,
   RadiusTokens,
+  SemanticTokens,
   ShadowTokens,
   SpacingTokens,
   TextStyle,
@@ -71,6 +73,12 @@ type ThemeProviderProps = {
    * Pass a stable reference for the same reasons as `theme`.
    */
   typography?: TypographyConfig;
+  /**
+   * Override any or all semantic color tokens. Each key maps to a `SemanticColorRef`
+   * — either `{ scale, shade }`, `'white'`, or `'transparent'`.
+   * Pass a stable reference for the same reasons as `theme`.
+   */
+  semantic?: Partial<SemanticTokens>;
   /** Prefix for all CSS variable names. Defaults to "tf" → e.g. `--tf-color-primary-500` */
   cssVarPrefix?: string;
   /** Provide a custom shade generator to replace the built-in implementation. */
@@ -84,6 +92,7 @@ export function ThemeProvider({
   radius,
   shadows,
   typography,
+  semantic,
   cssVarPrefix = DEFAULT_PREFIX,
   generateShades = defaultGenerateShades,
   children,
@@ -121,14 +130,19 @@ export function ThemeProvider({
     return { fontFamilies, fontSizes, fontWeights, lineHeights, letterSpacing, textStyles: textStyles as TextStyleTokens };
   }, [typography]);
 
+  const semanticTokens = useMemo<SemanticTokens>(
+    () => ({ ...DEFAULT_SEMANTIC, ...semantic }),
+    [semantic],
+  );
+
   const cssVars = useMemo(
-    () => buildCssVars(colors, spacingTokens, radiusTokens, shadowTokens, typographyTokens, cssVarPrefix, scopeId),
-    [colors, spacingTokens, radiusTokens, shadowTokens, typographyTokens, cssVarPrefix, scopeId],
+    () => buildCssVars(colors, spacingTokens, radiusTokens, shadowTokens, typographyTokens, semanticTokens, cssVarPrefix, scopeId),
+    [colors, spacingTokens, radiusTokens, shadowTokens, typographyTokens, semanticTokens, cssVarPrefix, scopeId],
   );
 
   const contextValue = useMemo<ThemeContextValue>(
-    () => ({ colors, spacing: spacingTokens, radius: radiusTokens, shadows: shadowTokens, typography: typographyTokens, cssVarPrefix }),
-    [colors, spacingTokens, radiusTokens, shadowTokens, typographyTokens, cssVarPrefix],
+    () => ({ colors, spacing: spacingTokens, radius: radiusTokens, shadows: shadowTokens, typography: typographyTokens, semantic: semanticTokens, cssVarPrefix }),
+    [colors, spacingTokens, radiusTokens, shadowTokens, typographyTokens, semanticTokens, cssVarPrefix],
   );
 
   return (

@@ -41,12 +41,20 @@ export type ThemeColors = {
   primary: ColorScale
   secondary: ColorScale
   neutral: ColorScale
+  success: ColorScale
+  warning: ColorScale
+  error: ColorScale
+  info: ColorScale
 } & { [K in keyof CustomColorKeys]: ColorScale }
 
 export type ThemeConfig = {
   primary: string
   secondary: string
   neutral: string
+  success: string
+  warning: string
+  error: string
+  info: string
 } & { [K in keyof CustomColorKeys]: string }
 
 // ── Spacing types ─────────────────────────────────────────────────────────────
@@ -313,6 +321,99 @@ export type TypographyConfig = {
   textStyles?: { [K in keyof TextStyleTokens]?: Partial<TextStyle> }
 }
 
+// ── Semantic color types ──────────────────────────────────────────────────────
+
+/**
+ * Extend this interface via module augmentation to add custom semantic color keys.
+ *
+ * @example
+ * ```ts
+ * declare module 'themeforge' {
+ *   interface CustomSemanticKeys {
+ *     'bg-brand': SemanticColorRef
+ *   }
+ * }
+ * ```
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface CustomSemanticKeys {}
+
+/** A reference to a primitive color — resolved at render time against the active theme. */
+export type SemanticColorRef = { scale: keyof ThemeConfig; shade: keyof ColorShades }
+
+export type SemanticTokens = {
+  // ── Background ──────────────────────────────────────────────────────────────
+  'bg-page': SemanticColorRef
+  'bg-subtle': SemanticColorRef
+  'bg-surface': SemanticColorRef
+  'bg-surface-raised': SemanticColorRef
+  'bg-primary': SemanticColorRef
+  'bg-primary-hover': SemanticColorRef
+  'bg-primary-active': SemanticColorRef
+  'bg-primary-disabled': SemanticColorRef
+  'bg-primary-selected': SemanticColorRef
+  'bg-primary-subtle': SemanticColorRef
+  'bg-secondary': SemanticColorRef
+  'bg-secondary-hover': SemanticColorRef
+  'bg-secondary-active': SemanticColorRef
+  'bg-secondary-disabled': SemanticColorRef
+  'bg-secondary-selected': SemanticColorRef
+  'bg-secondary-subtle': SemanticColorRef
+  'bg-success': SemanticColorRef
+  'bg-success-subtle': SemanticColorRef
+  'bg-warning': SemanticColorRef
+  'bg-warning-subtle': SemanticColorRef
+  'bg-error': SemanticColorRef
+  'bg-error-hover': SemanticColorRef
+  'bg-error-active': SemanticColorRef
+  'bg-error-subtle': SemanticColorRef
+  'bg-info': SemanticColorRef
+  'bg-info-subtle': SemanticColorRef
+  // ── Text ────────────────────────────────────────────────────────────────────
+  'text-primary': SemanticColorRef
+  'text-secondary': SemanticColorRef
+  'text-disabled': SemanticColorRef
+  'text-inverse': SemanticColorRef
+  'text-placeholder': SemanticColorRef
+  'text-link': SemanticColorRef
+  'text-link-hover': SemanticColorRef
+  /** Use on saturated/dark colored backgrounds (primary-500, error-500, etc.) */
+  'text-on-dark': SemanticColorRef
+  /** Use on light tinted backgrounds (subtle, selected, disabled) */
+  'text-on-light': SemanticColorRef
+  'text-success': SemanticColorRef
+  'text-warning': SemanticColorRef
+  'text-error': SemanticColorRef
+  'text-info': SemanticColorRef
+  // ── Icon ────────────────────────────────────────────────────────────────────
+  'icon-primary': SemanticColorRef
+  'icon-secondary': SemanticColorRef
+  'icon-disabled': SemanticColorRef
+  'icon-inverse': SemanticColorRef
+  /** Use on saturated/dark colored backgrounds */
+  'icon-on-dark': SemanticColorRef
+  /** Use on light tinted backgrounds */
+  'icon-on-light': SemanticColorRef
+  'icon-success': SemanticColorRef
+  'icon-warning': SemanticColorRef
+  'icon-error': SemanticColorRef
+  'icon-info': SemanticColorRef
+  // ── Border ──────────────────────────────────────────────────────────────────
+  'border-default': SemanticColorRef
+  'border-subtle': SemanticColorRef
+  'border-strong': SemanticColorRef
+  'border-primary': SemanticColorRef
+  'border-primary-focus': SemanticColorRef
+  'border-primary-disabled': SemanticColorRef
+  'border-secondary': SemanticColorRef
+  'border-secondary-focus': SemanticColorRef
+  'border-secondary-disabled': SemanticColorRef
+  'border-success': SemanticColorRef
+  'border-warning': SemanticColorRef
+  'border-error': SemanticColorRef
+  'border-info': SemanticColorRef
+} & { [K in keyof CustomSemanticKeys]: SemanticColorRef }
+
 // ── Context types ─────────────────────────────────────────────────────────────
 
 export type ThemeContextValue = {
@@ -321,6 +422,7 @@ export type ThemeContextValue = {
   radius: RadiusTokens
   shadows: ShadowTokens
   typography: TypographyTokens
+  semantic: SemanticTokens
   /** The CSS variable prefix in use — e.g. `"tf"` → `--tf-color-primary-500` */
   cssVarPrefix: string
 }

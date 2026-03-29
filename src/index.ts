@@ -31,4 +31,7 @@ export type {
   CustomLineHeightKeys,
   CustomLetterSpacingKeys,
   CustomTextStyleKeys,
+  SemanticColorRef,
+  SemanticTokens,
+  CustomSemanticKeys,
 } from "./types";

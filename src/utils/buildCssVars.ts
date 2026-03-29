@@ -1,4 +1,4 @@
-import type { RadiusTokens, ShadowDefinition, ShadowTokens, SpacingTokens, ThemeColors, TypographyTokens } from '../types'
+import type { RadiusTokens, SemanticColorRef, SemanticTokens, ShadowDefinition, ShadowTokens, SpacingTokens, ThemeColors, TypographyTokens } from '../types'
 
 function hexToRgb(hex: string): [number, number, number] {
   const clean = hex.replace('#', '')
@@ -30,12 +30,17 @@ function resolveShadowDefinition(
   }).join(', ')
 }
 
+function resolveSemanticRef(ref: SemanticColorRef, colors: ThemeColors): string {
+  return colors[ref.scale as keyof ThemeColors].shades[ref.shade]
+}
+
 export function buildCssVars(
   colors: ThemeColors,
   spacing: SpacingTokens,
   radius: RadiusTokens,
   shadows: ShadowTokens,
   typography: TypographyTokens,
+  semantic: SemanticTokens,
   prefix: string,
   scopeId: string,
 ): string {
@@ -88,6 +93,11 @@ export function buildCssVars(
     lines.push(`  --${prefix}-text-${styleName}-weight: ${fontWeights[style.weight]};`)
     lines.push(`  --${prefix}-text-${styleName}-line-height: ${lineHeights[style.lineHeight]};`)
     lines.push(`  --${prefix}-text-${styleName}-letter-spacing: ${letterSpacing[style.letterSpacing]};`)
+  }
+
+  // Semantic colors
+  for (const [key, ref] of Object.entries(semantic)) {
+    lines.push(`  --${prefix}-color-${key}: ${resolveSemanticRef(ref as SemanticColorRef, colors)};`)
   }
 
   return `#${scopeId} {\n${lines.join('\n')}\n}`

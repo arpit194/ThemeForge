@@ -7,12 +7,14 @@ import {
   DEFAULT_LETTER_SPACING,
   DEFAULT_LINE_HEIGHTS,
   DEFAULT_RADIUS,
+  DEFAULT_SEMANTIC,
   DEFAULT_SHADOWS,
   DEFAULT_SPACING,
   DEFAULT_TEXT_STYLES,
 } from '../../src/defaults.ts'
 
 export const COLOR_KEYS   = Object.keys(DEFAULT_CONFIG) as string[]
+export const SEMANTIC_DEFAULTS = DEFAULT_SEMANTIC as Record<string, { scale: string; shade: number }>
 export const COLOR_SHADES = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950] as const
 export const COLOR_DEFAULTS  = DEFAULT_CONFIG
 export const SPACING_DEFAULTS = DEFAULT_SPACING as Record<string, string>
