@@ -1,6 +1,6 @@
 {
   "name": "@arpit194/themeforge",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A lightweight, type-safe design token library for React",
   "type": "module",
   "sideEffects": false,
