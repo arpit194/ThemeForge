@@ -24,6 +24,7 @@
     "@arpit194/themeforge": ">=0.1.0"
   },
   "devDependencies": {
+    "@types/node": "^22.0.0",
     "typescript": "~5.9.3"
   }
 }
