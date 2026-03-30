@@ -147,10 +147,12 @@ export type ShadowLayer = {
   /** Spread radius. Negative when `negativeSpread` is true. */
   spread?: keyof SpacingTokens
   negativeSpread?: boolean
-  /** Shade from the neutral color scale. Defaults to 900. */
-  colorShade?: keyof ColorShades
-  /** Opacity of the shadow color, 0–1. */
-  opacity: number
+  /**
+   * Semantic color token to use for this layer. Defaults to `'shadow-color'`.
+   * Augment `CustomSemanticKeys` to add extra shadow color tokens
+   * (e.g. `'shadow-color-primary'`) and assign them per-layer.
+   */
+  semantic?: keyof SemanticTokens
   inset?: boolean
 }
 
@@ -412,9 +414,14 @@ export type SemanticTokens = {
   'border-warning': SemanticColorRef
   'border-error': SemanticColorRef
   'border-info': SemanticColorRef
+  // ── Shadow ───────────────────────────────────────────────────────────────────
+  /** Base color for box-shadows. Resolved to RGB channels for use with opacity. */
+  'shadow-color': SemanticColorRef
 } & { [K in keyof CustomSemanticKeys]: SemanticColorRef }
 
 // ── Context types ─────────────────────────────────────────────────────────────
+
+export type ColorScheme = 'light' | 'dark' | 'system'
 
 export type ThemeContextValue = {
   colors: ThemeColors
@@ -423,6 +430,8 @@ export type ThemeContextValue = {
   shadows: ShadowTokens
   typography: TypographyTokens
   semantic: SemanticTokens
+  /** Whether dark mode is currently active */
+  isDark: boolean
   /** The CSS variable prefix in use — e.g. `"tf"` → `--tf-color-primary-500` */
   cssVarPrefix: string
 }

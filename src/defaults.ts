@@ -59,39 +59,27 @@ export const DEFAULT_RADIUS: RadiusTokens = {
 
 export const DEFAULT_SHADOWS: ShadowTokens = {
   none: [],
-  xs: [{ y: "3xs", blur: "3xs", opacity: 0.05 }],
+  // blur ≈ y × 1.5–2 keeps the shadow tight and visible
+  // color defaults to var(--tf-color-shadow-color) via the 'shadow-color' semantic
+  xs: [{ y: "3xs", blur: "2xs" }],
   sm: [
-    { y: "3xs", blur: "2xs", opacity: 0.1 },
-    {
-      y: "3xs",
-      blur: "3xs",
-      spread: "3xs",
-      negativeSpread: true,
-      opacity: 0.1,
-    },
+    { y: "2xs", blur: "xs" },
+    { y: "3xs", blur: "2xs", spread: "3xs", negativeSpread: true },
   ],
   md: [
-    { y: "2xs", blur: "xs", spread: "3xs", negativeSpread: true, opacity: 0.1 },
-    {
-      y: "3xs",
-      blur: "2xs",
-      spread: "3xs",
-      negativeSpread: true,
-      opacity: 0.1,
-    },
+    { y: "xs", blur: "sm", spread: "3xs", negativeSpread: true },
+    { y: "2xs", blur: "xs", spread: "3xs", negativeSpread: true },
   ],
   lg: [
-    { y: "sm", blur: "md", spread: "3xs", negativeSpread: true, opacity: 0.1 },
-    { y: "2xs", blur: "xs", spread: "2xs", negativeSpread: true, opacity: 0.1 },
+    { y: "sm", blur: "md", spread: "2xs", negativeSpread: true },
+    { y: "xs", blur: "sm", spread: "2xs", negativeSpread: true },
   ],
   xl: [
-    { y: "lg", blur: "lg", spread: "2xs", negativeSpread: true, opacity: 0.1 },
-    { y: "xs", blur: "sm", spread: "xs", negativeSpread: true, opacity: 0.1 },
+    { y: "md", blur: "lg", spread: "xs", negativeSpread: true },
+    { y: "sm", blur: "md", spread: "xs", negativeSpread: true },
   ],
-  "2xl": [
-    { y: "lg", blur: "3xl", spread: "sm", negativeSpread: true, opacity: 0.25 },
-  ],
-  inner: [{ y: "3xs", blur: "2xs", opacity: 0.05, inset: true }],
+  "2xl": [{ y: "lg", blur: "xl", spread: "sm", negativeSpread: true }],
+  inner: [{ y: "2xs", blur: "xs", inset: true }],
 };
 
 // ── Typography defaults ───────────────────────────────────────────────────────
@@ -212,6 +200,79 @@ export const DEFAULT_SEMANTIC: SemanticTokens = {
   "border-warning": { scale: "warning", shade: 500 },
   "border-error": { scale: "error", shade: 500 },
   "border-info": { scale: "info", shade: 500 },
+  // Shadow
+  "shadow-color": { scale: "neutral", shade: 300 },
+};
+
+export const DEFAULT_SEMANTIC_DARK: SemanticTokens = {
+  // Background
+  "bg-page": { scale: "neutral", shade: 950 },
+  "bg-subtle": { scale: "neutral", shade: 900 },
+  "bg-surface": { scale: "neutral", shade: 800 },
+  "bg-surface-raised": { scale: "neutral", shade: 700 },
+  "bg-primary": { scale: "primary", shade: 500 },
+  "bg-primary-hover": { scale: "primary", shade: 400 },
+  "bg-primary-active": { scale: "primary", shade: 600 },
+  "bg-primary-disabled": { scale: "neutral", shade: 700 },
+  "bg-primary-selected": { scale: "primary", shade: 900 },
+  "bg-primary-subtle": { scale: "primary", shade: 950 },
+  "bg-secondary": { scale: "secondary", shade: 500 },
+  "bg-secondary-hover": { scale: "secondary", shade: 400 },
+  "bg-secondary-active": { scale: "secondary", shade: 600 },
+  "bg-secondary-disabled": { scale: "neutral", shade: 700 },
+  "bg-secondary-selected": { scale: "secondary", shade: 900 },
+  "bg-secondary-subtle": { scale: "secondary", shade: 950 },
+  "bg-success": { scale: "success", shade: 700 },
+  "bg-success-subtle": { scale: "success", shade: 950 },
+  "bg-warning": { scale: "warning", shade: 700 },
+  "bg-warning-subtle": { scale: "warning", shade: 950 },
+  "bg-error": { scale: "error", shade: 700 },
+  "bg-error-hover": { scale: "error", shade: 600 },
+  "bg-error-active": { scale: "error", shade: 800 },
+  "bg-error-subtle": { scale: "error", shade: 950 },
+  "bg-info": { scale: "info", shade: 700 },
+  "bg-info-subtle": { scale: "info", shade: 950 },
+  // Text
+  "text-primary": { scale: "neutral", shade: 50 },
+  "text-secondary": { scale: "neutral", shade: 300 },
+  "text-disabled": { scale: "neutral", shade: 600 },
+  "text-inverse": { scale: "neutral", shade: 950 },
+  "text-placeholder": { scale: "neutral", shade: 500 },
+  "text-link": { scale: "primary", shade: 400 },
+  "text-link-hover": { scale: "primary", shade: 300 },
+  "text-on-dark": { scale: "neutral", shade: 50 },
+  "text-on-light": { scale: "neutral", shade: 950 },
+  "text-success": { scale: "success", shade: 400 },
+  "text-warning": { scale: "warning", shade: 400 },
+  "text-error": { scale: "error", shade: 400 },
+  "text-info": { scale: "info", shade: 400 },
+  // Icon
+  "icon-primary": { scale: "neutral", shade: 100 },
+  "icon-secondary": { scale: "neutral", shade: 400 },
+  "icon-disabled": { scale: "neutral", shade: 600 },
+  "icon-inverse": { scale: "neutral", shade: 950 },
+  "icon-on-dark": { scale: "neutral", shade: 50 },
+  "icon-on-light": { scale: "neutral", shade: 950 },
+  "icon-success": { scale: "success", shade: 400 },
+  "icon-warning": { scale: "warning", shade: 400 },
+  "icon-error": { scale: "error", shade: 400 },
+  "icon-info": { scale: "info", shade: 400 },
+  // Border
+  "border-default": { scale: "neutral", shade: 700 },
+  "border-subtle": { scale: "neutral", shade: 800 },
+  "border-strong": { scale: "neutral", shade: 500 },
+  "border-primary": { scale: "primary", shade: 500 },
+  "border-primary-focus": { scale: "primary", shade: 400 },
+  "border-primary-disabled": { scale: "neutral", shade: 700 },
+  "border-secondary": { scale: "secondary", shade: 500 },
+  "border-secondary-focus": { scale: "secondary", shade: 400 },
+  "border-secondary-disabled": { scale: "neutral", shade: 700 },
+  "border-success": { scale: "success", shade: 600 },
+  "border-warning": { scale: "warning", shade: 600 },
+  "border-error": { scale: "error", shade: 600 },
+  "border-info": { scale: "info", shade: 600 },
+  // Shadow
+  "shadow-color": { scale: "neutral", shade: 800 },
 };
 
 export const DEFAULT_TEXT_STYLES: TextStyleTokens = {

@@ -1,37 +1,29 @@
-import type { RadiusTokens, SemanticColorRef, SemanticTokens, ShadowDefinition, ShadowTokens, SpacingTokens, ThemeColors, TypographyTokens } from '../types'
-
-function hexToRgb(hex: string): [number, number, number] {
-  const clean = hex.replace('#', '')
-  const full = clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean
-  const n = parseInt(full, 16)
-  return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
-}
+import type {
+  RadiusTokens,
+  SemanticColorRef,
+  SemanticTokens,
+  ShadowDefinition,
+  ShadowTokens,
+  SpacingTokens,
+  ThemeColors,
+  TypographyTokens,
+} from '../types'
 
 function resolveShadowDefinition(
   definition: ShadowDefinition,
   spacing: SpacingTokens,
-  colors: ThemeColors,
+  prefix: string,
 ): string {
   if (definition.length === 0) return 'none'
-
   return definition.map(layer => {
     const x      = layer.x ? spacing[layer.x] : '0'
     const y      = spacing[layer.y]
     const blur   = spacing[layer.blur]
-    const spread = layer.spread
-      ? `${layer.negativeSpread ? '-' : ''}${spacing[layer.spread]}`
-      : '0'
-    const shade  = layer.colorShade ?? 900
-    const hex    = colors.neutral.shades[shade]
-    const [r, g, b] = hexToRgb(hex)
-    const color  = `rgb(${r} ${g} ${b} / ${layer.opacity})`
+    const spread = layer.spread ? `${layer.negativeSpread ? '-' : ''}${spacing[layer.spread]}` : '0'
     const inset  = layer.inset ? 'inset ' : ''
+    const color  = `var(--${prefix}-color-${layer.semantic ?? 'shadow-color'})`
     return `${inset}${x} ${y} ${blur} ${spread} ${color}`
   }).join(', ')
-}
-
-function resolveSemanticRef(ref: SemanticColorRef, colors: ThemeColors): string {
-  return colors[ref.scale as keyof ThemeColors].shades[ref.shade]
 }
 
 export function buildCssVars(
@@ -41,64 +33,74 @@ export function buildCssVars(
   shadows: ShadowTokens,
   typography: TypographyTokens,
   semantic: SemanticTokens,
+  semanticDark: SemanticTokens,
   prefix: string,
   scopeId: string,
 ): string {
-  const lines: string[] = []
+  const light: string[] = []
+  const dark:  string[] = []
 
-  // Colors
+  // ── Primitive colors (mode-independent) ─────────────────────────────────────
   for (const [colorName, scale] of Object.entries(colors)) {
     for (const [shade, value] of Object.entries(scale.shades)) {
-      lines.push(`  --${prefix}-color-${colorName}-${shade}: ${value};`)
+      light.push(`  --${prefix}-color-${colorName}-${shade}: ${value};`)
     }
   }
 
-  // Spacing
+  // ── Spacing / Radius / Shadows / Typography — mode-independent ───────────────
   for (const [key, value] of Object.entries(spacing)) {
-    lines.push(`  --${prefix}-spacing-${key}: ${value};`)
+    light.push(`  --${prefix}-spacing-${key}: ${value};`)
   }
-
-  // Radius
   for (const [key, value] of Object.entries(radius)) {
-    lines.push(`  --${prefix}-radius-${key}: ${value};`)
+    light.push(`  --${prefix}-radius-${key}: ${value};`)
   }
-
-  // Shadows
   for (const [key, definition] of Object.entries(shadows)) {
-    lines.push(`  --${prefix}-shadow-${key}: ${resolveShadowDefinition(definition, spacing, colors)};`)
+    light.push(`  --${prefix}-shadow-${key}: ${resolveShadowDefinition(definition, spacing, prefix)};`)
   }
-
-  // Typography — primitives
   for (const [key, value] of Object.entries(typography.fontFamilies)) {
-    lines.push(`  --${prefix}-font-family-${key}: ${value};`)
+    light.push(`  --${prefix}-font-family-${key}: ${value};`)
   }
   for (const [key, value] of Object.entries(typography.fontSizes)) {
-    lines.push(`  --${prefix}-font-size-${key}: ${value};`)
+    light.push(`  --${prefix}-font-size-${key}: ${value};`)
   }
   for (const [key, value] of Object.entries(typography.fontWeights)) {
-    lines.push(`  --${prefix}-font-weight-${key}: ${value};`)
+    light.push(`  --${prefix}-font-weight-${key}: ${value};`)
   }
   for (const [key, value] of Object.entries(typography.lineHeights)) {
-    lines.push(`  --${prefix}-line-height-${key}: ${value};`)
+    light.push(`  --${prefix}-line-height-${key}: ${value};`)
   }
   for (const [key, value] of Object.entries(typography.letterSpacing)) {
-    lines.push(`  --${prefix}-letter-spacing-${key}: ${value};`)
+    light.push(`  --${prefix}-letter-spacing-${key}: ${value};`)
   }
-
-  // Typography — semantic text styles (resolved values, not var() references)
   const { fontFamilies, fontSizes, fontWeights, lineHeights, letterSpacing } = typography
   for (const [styleName, style] of Object.entries(typography.textStyles)) {
-    lines.push(`  --${prefix}-text-${styleName}-family: ${fontFamilies[style.family]};`)
-    lines.push(`  --${prefix}-text-${styleName}-size: ${fontSizes[style.size]};`)
-    lines.push(`  --${prefix}-text-${styleName}-weight: ${fontWeights[style.weight]};`)
-    lines.push(`  --${prefix}-text-${styleName}-line-height: ${lineHeights[style.lineHeight]};`)
-    lines.push(`  --${prefix}-text-${styleName}-letter-spacing: ${letterSpacing[style.letterSpacing]};`)
+    light.push(`  --${prefix}-text-${styleName}-family: ${fontFamilies[style.family]};`)
+    light.push(`  --${prefix}-text-${styleName}-size: ${fontSizes[style.size]};`)
+    light.push(`  --${prefix}-text-${styleName}-weight: ${fontWeights[style.weight]};`)
+    light.push(`  --${prefix}-text-${styleName}-line-height: ${lineHeights[style.lineHeight]};`)
+    light.push(`  --${prefix}-text-${styleName}-letter-spacing: ${letterSpacing[style.letterSpacing]};`)
   }
 
-  // Semantic colors
+  // ── Semantic colors — light ───────────────────────────────────────────────────
   for (const [key, ref] of Object.entries(semantic)) {
-    lines.push(`  --${prefix}-color-${key}: ${resolveSemanticRef(ref as SemanticColorRef, colors)};`)
+    const r = ref as SemanticColorRef
+    light.push(`  --${prefix}-color-${key}: var(--${prefix}-color-${r.scale}-${r.shade});`)
   }
 
-  return `#${scopeId} {\n${lines.join('\n')}\n}`
+  // ── Semantic colors — dark ────────────────────────────────────────────────────
+  for (const [key, ref] of Object.entries(semanticDark)) {
+    const r = ref as SemanticColorRef
+    dark.push(`  --${prefix}-color-${key}: var(--${prefix}-color-${r.scale}-${r.shade});`)
+  }
+
+  // ── Assemble ──────────────────────────────────────────────────────────────────
+  const lightBlock = `#${scopeId} {\n${light.join('\n')}\n}`
+
+  const darkLines = dark.join('\n')
+  const darkBlock = [
+    `@media (prefers-color-scheme: dark) {\n  #${scopeId}:not([data-theme="light"]) {\n${dark.map(l => '  ' + l).join('\n')}\n  }\n}`,
+    `#${scopeId}[data-theme="dark"] {\n${darkLines}\n}`,
+  ].join('\n')
+
+  return `${lightBlock}\n${darkBlock}`
 }

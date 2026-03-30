@@ -1,5 +1,6 @@
 export { ThemeProvider, useTheme } from "./ThemeProvider";
 export { generateShades } from "./utils/generateShades";
+export { DEFAULT_SEMANTIC_DARK } from "./defaults";
 export type {
   ColorShades,
   ColorScale,
@@ -34,4 +35,5 @@ export type {
   SemanticColorRef,
   SemanticTokens,
   CustomSemanticKeys,
+  ColorScheme,
 } from "./types";

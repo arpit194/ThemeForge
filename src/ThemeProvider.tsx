@@ -3,6 +3,7 @@ import {
   useContext,
   useId,
   useMemo,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import { generateShades as defaultGenerateShades } from "./utils/generateShades";
@@ -17,12 +18,14 @@ import {
   DEFAULT_PREFIX,
   DEFAULT_RADIUS,
   DEFAULT_SEMANTIC,
+  DEFAULT_SEMANTIC_DARK,
   DEFAULT_SHADOWS,
   DEFAULT_SPACING,
   DEFAULT_TEXT_STYLES,
 } from "./defaults";
 import type {
   ColorScale,
+  ColorScheme,
   GenerateShadesFn,
   RadiusTokens,
   SemanticTokens,
@@ -74,17 +77,38 @@ type ThemeProviderProps = {
    */
   typography?: TypographyConfig;
   /**
-   * Override any or all semantic color tokens. Each key maps to a `SemanticColorRef`
-   * — either `{ scale, shade }`, `'white'`, or `'transparent'`.
+   * Override any or all semantic color tokens. Each key maps to a `SemanticColorRef`.
    * Pass a stable reference for the same reasons as `theme`.
    */
   semantic?: Partial<SemanticTokens>;
+  /**
+   * Override semantic color tokens specifically in dark mode.
+   * These are applied on top of the automatic primitive inversion.
+   * Pass a stable reference for the same reasons as `theme`.
+   */
+  semanticDark?: Partial<SemanticTokens>;
+  /**
+   * Color scheme preference. `'light'` or `'dark'` forces a mode.
+   * `'system'` (default) follows the OS preference via `prefers-color-scheme`.
+   */
+  colorScheme?: ColorScheme;
   /** Prefix for all CSS variable names. Defaults to "tf" → e.g. `--tf-color-primary-500` */
   cssVarPrefix?: string;
   /** Provide a custom shade generator to replace the built-in implementation. */
   generateShades?: GenerateShadesFn;
   children: ReactNode;
 };
+
+const systemDarkQuery = typeof window !== 'undefined' ? window.matchMedia('(prefers-color-scheme: dark)') : null
+
+function subscribeToSystem(cb: () => void) {
+  systemDarkQuery?.addEventListener('change', cb)
+  return () => systemDarkQuery?.removeEventListener('change', cb)
+}
+
+function getSystemSnapshot() {
+  return systemDarkQuery?.matches ?? false
+}
 
 export function ThemeProvider({
   theme,
@@ -93,10 +117,15 @@ export function ThemeProvider({
   shadows,
   typography,
   semantic,
+  semanticDark,
+  colorScheme = 'system',
   cssVarPrefix = DEFAULT_PREFIX,
   generateShades = defaultGenerateShades,
   children,
 }: ThemeProviderProps) {
+  const systemIsDark = useSyncExternalStore(subscribeToSystem, getSystemSnapshot, () => false)
+  const isDark = colorScheme === 'dark' || (colorScheme === 'system' && systemIsDark)
+
   const config = useMemo<ThemeConfig>(() => ({ ...DEFAULT_CONFIG, ...theme }), [theme]);
   const spacingTokens = useMemo<SpacingTokens>(() => ({ ...DEFAULT_SPACING, ...spacing }), [spacing]);
   const radiusTokens = useMemo<RadiusTokens>(() => ({ ...DEFAULT_RADIUS, ...radius }), [radius]);
@@ -135,19 +164,24 @@ export function ThemeProvider({
     [semantic],
   );
 
+  const semanticDarkTokens = useMemo<SemanticTokens>(
+    () => ({ ...DEFAULT_SEMANTIC_DARK, ...semanticDark }),
+    [semanticDark],
+  );
+
   const cssVars = useMemo(
-    () => buildCssVars(colors, spacingTokens, radiusTokens, shadowTokens, typographyTokens, semanticTokens, cssVarPrefix, scopeId),
-    [colors, spacingTokens, radiusTokens, shadowTokens, typographyTokens, semanticTokens, cssVarPrefix, scopeId],
+    () => buildCssVars(colors, spacingTokens, radiusTokens, shadowTokens, typographyTokens, semanticTokens, semanticDarkTokens, cssVarPrefix, scopeId),
+    [colors, spacingTokens, radiusTokens, shadowTokens, typographyTokens, semanticTokens, semanticDarkTokens, cssVarPrefix, scopeId],
   );
 
   const contextValue = useMemo<ThemeContextValue>(
-    () => ({ colors, spacing: spacingTokens, radius: radiusTokens, shadows: shadowTokens, typography: typographyTokens, semantic: semanticTokens, cssVarPrefix }),
-    [colors, spacingTokens, radiusTokens, shadowTokens, typographyTokens, semanticTokens, cssVarPrefix],
+    () => ({ colors, spacing: spacingTokens, radius: radiusTokens, shadows: shadowTokens, typography: typographyTokens, semantic: semanticTokens, isDark, cssVarPrefix }),
+    [colors, spacingTokens, radiusTokens, shadowTokens, typographyTokens, semanticTokens, isDark, cssVarPrefix],
   );
 
   return (
     <ThemeContext.Provider value={contextValue}>
-      <div id={scopeId} style={{ display: "contents" }}>
+      <div id={scopeId} data-theme={colorScheme !== 'system' ? colorScheme : undefined} style={{ display: "contents" }}>
         <style>{cssVars}</style>
         {children}
       </div>
